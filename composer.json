@@ -1,0 +1,36 @@
+{
+  "name": "alexpts/muttable-psr7",
+  "description": "A fast PHP7 implementation of PSR-7",
+  "keywords": [
+    "psr-7",
+    "psr-17",
+    "mutable"
+  ],
+  "license": "MIT",
+  "type": "library",
+  "authors": [
+    {
+      "name": "alexpts",
+      "email": "alexpts@yandex.ru"
+    }
+  ],
+  "require": {
+    "php": ">=7.4",
+    "psr/http-message": "^1.0",
+    "php-http/message-factory": "^1.0",
+    "psr/http-factory": "^1.0",
+    "ext-json": "*"
+  },
+  "minimum-stability": "stable",
+  "autoload": {
+    "psr-4": {
+      "PTS\\Psr7\\": "src"
+    }
+  },
+  "config": {
+    "optimize-autoloader": true
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.2"
+  }
+}

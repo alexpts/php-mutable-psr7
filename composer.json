@@ -1,5 +1,5 @@
 {
-  "name": "alexpts/muttable-psr7",
+  "name": "alexpts/mutable-psr7",
   "description": "A fast PHP7 implementation of PSR-7",
   "keywords": [
     "psr-7",

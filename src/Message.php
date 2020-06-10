@@ -14,7 +14,11 @@ use function trim;
 class Message implements MessageInterface
 {
 
-	/** @var array - all header name must be convert to lowercase */
+	/**
+	 * RFC-2616, RFC-7230 - case-insensitive; HTTP2 pack convert all header to lowercase
+	 *
+	 * @var array - all header name will be convert to lowercase
+	 */
 	protected array $headers = [];
 	protected string $protocol = '1.1';
 	protected ?StreamInterface $stream = null;
@@ -104,7 +108,7 @@ class Message implements MessageInterface
 
 		$returnValues = [];
 		foreach ($values as $v) {
-			if ((!is_numeric($v) && !is_string($v)) || 1 !== preg_match("@^[ \t\x21-\x7E\x80-\xFF]*$@", (string) $v)) {
+			if ((!is_numeric($v) && !is_string($v)) || 1 !== preg_match("@^[ \t\x21-\x7E\x80-\xFF]*$@", (string)$v)) {
 				throw new InvalidArgumentException('Header values must be RFC 7230 compatible strings.');
 			}
 

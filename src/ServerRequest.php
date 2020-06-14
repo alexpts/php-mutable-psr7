@@ -35,7 +35,9 @@ class ServerRequest extends Request implements ServerRequestInterface, ServerMes
 		array $serverParams = []
 	) {
 		parent::__construct($method, $uri, $headers, $body, $version);
+
 		$this->serverParams = $serverParams;
+		parse_str($uri->getQuery(), $this->queryParams);
 	}
 
 	public function getServerParams(): array
@@ -50,10 +52,8 @@ class ServerRequest extends Request implements ServerRequestInterface, ServerMes
 
 	public function withUploadedFiles(array $uploadedFiles)
 	{
-		$new = clone $this;
-		$new->uploadedFiles = $uploadedFiles;
-
-		return $new;
+		$this->uploadedFiles = $uploadedFiles;
+		return $this;
 	}
 
 	public function getCookieParams(): array
@@ -63,10 +63,8 @@ class ServerRequest extends Request implements ServerRequestInterface, ServerMes
 
 	public function withCookieParams(array $cookies)
 	{
-		$new = clone $this;
-		$new->cookieParams = $cookies;
-
-		return $new;
+		$this->cookieParams = $cookies;
+		return $this;
 	}
 
 	public function getQueryParams(): array
@@ -76,10 +74,8 @@ class ServerRequest extends Request implements ServerRequestInterface, ServerMes
 
 	public function withQueryParams(array $query)
 	{
-		$new = clone $this;
-		$new->queryParams = $query;
-
-		return $new;
+		$this->queryParams = $query;
+		return $this;
 	}
 
 	public function getParsedBody()

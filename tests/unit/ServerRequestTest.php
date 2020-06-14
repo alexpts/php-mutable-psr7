@@ -10,17 +10,13 @@ class ServerRequestTest extends TestCase
 {
 	public function testUploadedFiles(): void
 	{
-		$request1 = new ServerRequest('GET', new Uri('/'));
-
+		$request = new ServerRequest('GET', new Uri('/'));
 		$files = [
 			'file' => new UploadedFile('test', 123, UPLOAD_ERR_OK),
 		];
 
-		$request2 = $request1->withUploadedFiles($files);
-
-		static::assertNotSame($request2, $request1);
-		static::assertSame([], $request1->getUploadedFiles());
-		static::assertSame($files, $request2->getUploadedFiles());
+		$request->withUploadedFiles($files);
+		static::assertSame($files, $request->getUploadedFiles());
 	}
 
 	public function testServerParams(): void
@@ -33,28 +29,31 @@ class ServerRequestTest extends TestCase
 
 	public function testCookieParams(): void
 	{
-		$request1 = new ServerRequest('GET', new Uri('/'));
+		$request = new ServerRequest('GET', new Uri('/'));
 
 		$params = ['name' => 'value'];
-
-		$request2 = $request1->withCookieParams($params);
-
-		static::assertNotSame($request2, $request1);
-		static::assertEmpty($request1->getCookieParams());
-		static::assertSame($params, $request2->getCookieParams());
+		$request->withCookieParams($params);
+		static::assertSame($params, $request->getCookieParams());
 	}
 
 	public function testQueryParams(): void
 	{
-		$request1 = new ServerRequest('GET', new Uri('/'));
-
+		$request = new ServerRequest('GET', new Uri('/'));
 		$params = ['name' => 'value'];
 
-		$request2 = $request1->withQueryParams($params);
+		$request->withQueryParams($params);
+		static::assertSame($params, $request->getQueryParams());
+	}
 
-		static::assertNotSame($request2, $request1);
-		static::assertEmpty($request1->getQueryParams());
-		static::assertSame($params, $request2->getQueryParams());
+	public function testQueryParamsFromUri(): void
+	{
+		$request = new ServerRequest('GET', new Uri('/?name=value&age=12'));
+		$expected = ['name' => 'value', 'age' => '12'];
+		static::assertCount(2, $request->getQueryParams());
+		static::assertSame($expected, $request->getQueryParams());
+
+		$request = new ServerRequest('GET', new Uri('/'));
+		static::assertCount(0, $request->getQueryParams());
 	}
 
 	public function testParsedBody(): void

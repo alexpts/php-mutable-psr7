@@ -134,8 +134,9 @@ class Message implements MessageInterface
 				$this->headers[$name] = [];
 			}
 
+			$values = $this->validateAndTrimHeader($name, $values);
+
 			foreach ($values as $value) {
-				$value = $this->validateAndTrimHeader($name, (array)$value)[0];
 				$this->headers[$name][] = $value;
 			}
 		}

@@ -111,12 +111,12 @@ class Stream implements StreamInterface
 
 	public function detach()
 	{
-		if (!isset($this->stream)) {
+		if ($this->stream === null) {
 			return null;
 		}
 
 		$result = $this->stream;
-		unset($this->stream);
+		$this->stream = null;
 
 		$this->size = $this->uri = null;
 		$this->readable = $this->writable = $this->seekable = false;
@@ -150,7 +150,7 @@ class Stream implements StreamInterface
 
 	public function tell(): int
 	{
-		$position = ftell($this->stream);
+		$position = $this->stream === null ? false : ftell($this->stream);
 		if (false === $position) {
 			throw new RuntimeException('Unable to determine stream position');
 		}

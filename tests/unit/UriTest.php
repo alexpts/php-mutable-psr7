@@ -481,7 +481,7 @@ class UriTest extends TestCase
 
 	public function testUtf8Host(): void
 	{
-		$this->markTestSkipped('Not correct utf-8 in macOS default php');
+		//$this->markTestSkipped('Not correct utf-8 in macOS default php');
 
 		$uri = new Uri('http://москва.рф/');
 		static::assertSame('москва.рф', $uri->getHost());

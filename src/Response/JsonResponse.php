@@ -65,7 +65,7 @@ class JsonResponse extends HttpResponse implements JsonResponseInterface
 
 		if ($this->stream) {
 			$this->stream->close();
-			unset($this->stream);
+			$this->stream = null;
 		}
 
 		return $this;

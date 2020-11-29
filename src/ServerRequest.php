@@ -13,83 +13,82 @@ use function is_object;
 
 class ServerRequest extends Request implements ServerRequestInterface, ServerMessageInterface
 {
-	use ServerMessage;
+    use ServerMessage;
 
-	protected array $cookieParams = [];
+    protected array $cookieParams = [];
 
-	/** @var array|object|null */
-	protected $parsedBody;
-	protected array $queryParams = [];
-	protected array $serverParams;
+    /** @var array|object|null */
+    protected $parsedBody;
+    protected array $queryParams = [];
+    protected array $serverParams;
 
-	/** @var UploadedFileInterface[] */
-	protected array $uploadedFiles = [];
+    /** @var UploadedFileInterface[] */
+    protected array $uploadedFiles = [];
 
+    public function __construct(
+        string $method,
+        UriInterface $uri,
+        array $headers = [],
+        $body = null,
+        string $version = '1.1',
+        array $serverParams = []
+    ) {
+        parent::__construct($method, $uri, $headers, $body, $version);
 
-	public function __construct(
-		string $method,
-		UriInterface $uri,
-		array $headers = [],
-		$body = null,
-		string $version = '1.1',
-		array $serverParams = []
-	) {
-		parent::__construct($method, $uri, $headers, $body, $version);
+        $this->serverParams = $serverParams;
+        parse_str($uri->getQuery(), $this->queryParams);
+    }
 
-		$this->serverParams = $serverParams;
-		parse_str($uri->getQuery(), $this->queryParams);
-	}
+    public function getServerParams(): array
+    {
+        return $this->serverParams;
+    }
 
-	public function getServerParams(): array
-	{
-		return $this->serverParams;
-	}
+    public function getUploadedFiles(): array
+    {
+        return $this->uploadedFiles;
+    }
 
-	public function getUploadedFiles(): array
-	{
-		return $this->uploadedFiles;
-	}
+    public function withUploadedFiles(array $uploadedFiles)
+    {
+        $this->uploadedFiles = $uploadedFiles;
+        return $this;
+    }
 
-	public function withUploadedFiles(array $uploadedFiles)
-	{
-		$this->uploadedFiles = $uploadedFiles;
-		return $this;
-	}
+    public function getCookieParams(): array
+    {
+        return $this->cookieParams;
+    }
 
-	public function getCookieParams(): array
-	{
-		return $this->cookieParams;
-	}
+    public function withCookieParams(array $cookies)
+    {
+        $this->cookieParams = $cookies;
+        return $this;
+    }
 
-	public function withCookieParams(array $cookies)
-	{
-		$this->cookieParams = $cookies;
-		return $this;
-	}
+    public function getQueryParams(): array
+    {
+        return $this->queryParams;
+    }
 
-	public function getQueryParams(): array
-	{
-		return $this->queryParams;
-	}
+    public function withQueryParams(array $query)
+    {
+        $this->queryParams = $query;
+        return $this;
+    }
 
-	public function withQueryParams(array $query)
-	{
-		$this->queryParams = $query;
-		return $this;
-	}
+    public function getParsedBody()
+    {
+        return $this->parsedBody;
+    }
 
-	public function getParsedBody()
-	{
-		return $this->parsedBody;
-	}
+    public function withParsedBody($data)
+    {
+        if (!is_array($data) && !is_object($data) && null !== $data) {
+            throw new InvalidArgumentException('First parameter to withParsedBody MUST be object, array or null');
+        }
 
-	public function withParsedBody($data)
-	{
-		if (!is_array($data) && !is_object($data) && null !== $data) {
-			throw new InvalidArgumentException('First parameter to withParsedBody MUST be object, array or null');
-		}
-
-		$this->parsedBody = $data;
-		return $this;
-	}
+        $this->parsedBody = $data;
+        return $this;
+    }
 }

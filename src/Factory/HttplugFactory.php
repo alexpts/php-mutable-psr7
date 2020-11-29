@@ -14,28 +14,33 @@ use PTS\Psr7\Uri;
 
 class HttplugFactory implements MessageFactory, StreamFactory, UriFactory
 {
-	public function createRequest($method, $uri, array $headers = [], $body = null, $protocolVersion = '1.1')
-	{
-		$uri = $this->createUri($uri);
-		return new Request($method, $uri, $headers, $body, $protocolVersion);
-	}
+    public function createRequest($method, $uri, array $headers = [], $body = null, $protocolVersion = '1.1')
+    {
+        $uri = $this->createUri($uri);
+        return new Request($method, $uri, $headers, $body, $protocolVersion);
+    }
 
-	public function createResponse($statusCode = 200, $reasonPhrase = null, array $headers = [], $body = null, $version = '1.1')
-	{
-		return new Response((int)$statusCode, $headers, $body, $version, $reasonPhrase);
-	}
+    public function createResponse(
+        $statusCode = 200,
+        $reasonPhrase = null,
+        array $headers = [],
+        $body = null,
+        $version = '1.1'
+    ) {
+        return new Response((int)$statusCode, $headers, $body, $version, $reasonPhrase);
+    }
 
-	public function createStream($body = null)
-	{
-		return Stream::create($body ?? '');
-	}
+    public function createStream($body = null)
+    {
+        return Stream::create($body ?? '');
+    }
 
-	public function createUri($uri = ''): UriInterface
-	{
-		if ($uri instanceof UriInterface) {
-			return $uri;
-		}
+    public function createUri($uri = ''): UriInterface
+    {
+        if ($uri instanceof UriInterface) {
+            return $uri;
+        }
 
-		return new Uri($uri);
-	}
+        return new Uri($uri);
+    }
 }

@@ -10,64 +10,64 @@ use PTS\Psr7\Stream;
 
 class JsonResponse extends HttpResponse implements JsonResponseInterface
 {
-	protected array $data = [];
-	protected bool $isSyncBody = false;
+    protected array $data = [];
+    protected bool $isSyncBody = false;
 
-	public function __construct(
-		array $data,
-		int $status = 200,
-		array $headers = [],
-		string $version = '1.1'
-	) {
-		$headers['Content-Type'] = 'application/json';
-		parent::__construct($status, $headers, null, $version);
-		$this->data = $data;
-	}
+    public function __construct(
+        array $data,
+        int $status = 200,
+        array $headers = [],
+        string $version = '1.1'
+    ) {
+        $headers['Content-Type'] = 'application/json';
+        parent::__construct($status, $headers, null, $version);
+        $this->data = $data;
+    }
 
-	public function getData(): array
-	{
-		return $this->data;
-	}
+    public function getData(): array
+    {
+        return $this->data;
+    }
 
-	public function getBody(): StreamInterface
-	{
-		if (!$this->isSyncBody) {
-			$this->isSyncBody = true;
-			$data = json_encode($this->data, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE, 512);
-			parent::withBody(Stream::create($data));
-		}
+    public function getBody(): StreamInterface
+    {
+        if (!$this->isSyncBody) {
+            $this->isSyncBody = true;
+            $data = json_encode($this->data, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE, 512);
+            parent::withBody(Stream::create($data));
+        }
 
-		return parent::getBody();
-	}
+        return parent::getBody();
+    }
 
-	public function withBody(StreamInterface $body): Message
-	{
-		$this->data = json_decode((string)$body, true, 512, JSON_THROW_ON_ERROR);
-		$this->isSyncBody = true;
-		return parent::withBody($body);
-	}
+    public function withBody(StreamInterface $body): Message
+    {
+        $this->data = json_decode((string)$body, true, 512, JSON_THROW_ON_ERROR);
+        $this->isSyncBody = true;
+        return parent::withBody($body);
+    }
 
-	public function setData(array $data): self
-	{
-		$this->isSyncBody = false;
-		$this->data = $data;
-		return $this;
-	}
+    public function setData(array $data): static
+    {
+        $this->isSyncBody = false;
+        $this->data = $data;
+        return $this;
+    }
 
-	public function reset(): self
-	{
-		$this->setData([]);
-		$this->protocol = '1.1';
-		$this->statusCode = 200;
-		$this->attributes = [];
-		$this->headers = [];
-		$this->withHeader('Content-Type', 'application/json');
+    public function reset(): static
+    {
+        $this->setData([]);
+        $this->protocol = '1.1';
+        $this->statusCode = 200;
+        $this->attributes = [];
+        $this->headers = [];
+        $this->withHeader('Content-Type', 'application/json');
 
-		if ($this->stream) {
-			$this->stream->close();
-			$this->stream = null;
-		}
+        if ($this->stream) {
+            $this->stream->close();
+            $this->stream = null;
+        }
 
-		return $this;
-	}
+        return $this;
+    }
 }

@@ -89,7 +89,7 @@ class Message implements MessageInterface
 		return $this;
 	}
 
-	public function reset(): self
+	public function reset(): static
 	{
 		$this->headers = [];
 		if ($this->stream) {

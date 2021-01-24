@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace PTS\Psr7\Factory;
 
 use InvalidArgumentException;
+use Nyholm\Psr7Server\ServerRequestCreator;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -31,6 +32,10 @@ class Psr17Factory
     implements RequestFactoryInterface, ResponseFactoryInterface, ServerRequestFactoryInterface, StreamFactoryInterface,
     UploadedFileFactoryInterface, UriFactoryInterface
 {
+
+    /** @var ServerRequestCreator|null */
+    protected ?ServerRequestCreator $creatorFromGlobal = null;
+
     public function createRequest(string $method, $uri): RequestInterface
     {
         if (is_string($uri)) {
@@ -99,5 +104,15 @@ class Psr17Factory
         }
 
         return new ServerRequest($method, $uri, [], null, '1.1', $serverParams);
+    }
+
+    public function fromGlobals(): ServerRequestInterface
+    {
+        if ($this->creatorFromGlobal === null) {
+            $psr17 = new static;
+            $this->creatorFromGlobal = new ServerRequestCreator($psr17, $psr17, $psr17, $psr17);
+        }
+
+        return $this->creatorFromGlobal->fromGlobals();
     }
 }

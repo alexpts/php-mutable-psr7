@@ -94,4 +94,11 @@ class Psr17FactoryTest extends TestCase
         static::assertSame('GET', $request->getMethod());
         static::assertSame('/', (string)$request->getUri());
     }
+
+    public function testFakeFromGlobals(): void
+    {
+        $factory = new Psr17Factory;
+        $request = $factory->fromGlobals();
+        static::assertSame('GET', $request->getMethod());
+    }
 }

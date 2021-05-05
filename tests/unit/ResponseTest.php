@@ -279,7 +279,7 @@ class ResponseTest extends TestCase
     public function unSupportHeaderValue(): array
     {
         return [
-            ["Not a line \r\n"],
+            ["Not a line \r\n_"],
         ];
     }
 }

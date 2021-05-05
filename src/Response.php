@@ -99,13 +99,9 @@ class Response extends Message implements ServerMessageInterface, ResponseInterf
         }
 
         $this->statusCode = $status;
-        $this->setHeaders($headers);
-
-        $this->reasonPhrase = $reason === null && isset(self::PHRASES[$this->statusCode])
-            ? self::PHRASES[$status]
-            : $reason ?? '';
-
+        $this->reasonPhrase = $reason ?? self::PHRASES[$this->statusCode] ?? '';
         $this->protocol = $version;
+        $this->setHeaders($headers);
     }
 
     public function getStatusCode(): int
@@ -129,11 +125,7 @@ class Response extends Message implements ServerMessageInterface, ResponseInterf
         }
 
         $this->statusCode = $code;
-        if ('' === $reasonPhrase && isset(self::PHRASES[$this->statusCode])) {
-            $reasonPhrase = self::PHRASES[$this->statusCode];
-        }
-
-        $this->reasonPhrase = $reasonPhrase;
+        $this->reasonPhrase = $reasonPhrase !== '' ? $reasonPhrase : (self::PHRASES[$this->statusCode] ?? '');
         return $this;
     }
 }

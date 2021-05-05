@@ -63,7 +63,10 @@ class Message implements MessageInterface
     public function withHeader($name, $value): self
     {
         $name = strtolower($name);
-        $this->headers[$name] = $this->validateAndTrimHeader($name, (array)$value);
+        $value = array_map('trim', (array)$value);
+        $this->validateHeader($name, $value);
+
+        $this->headers[$name] = $value;
         return $this;
     }
 
@@ -100,22 +103,17 @@ class Message implements MessageInterface
         return $this;
     }
 
-    protected function validateAndTrimHeader(string $name, array $values): array
+    protected function validateHeader(string $name, array $values): void
     {
         if (preg_match("@^[!#$%&'*+.^_`|~0-9A-Za-z-]+$@", $name) !== 1) {
             throw new InvalidArgumentException('Header name must be an RFC 7230 compatible string.');
         }
 
-        $returnValues = [];
         foreach ($values as $v) {
-            if ((!is_numeric($v) && !is_string($v)) || 1 !== preg_match("@^[ \t\x21-\x7E\x80-\xFF]*$@", (string)$v)) {
+            if (!is_string($v) || 1 !== preg_match("@^[ \x09\x21-\x7E\x80-\xFF]*$@", (string)$v)) {
                 throw new InvalidArgumentException('Header values must be RFC 7230 compatible strings.');
             }
-
-            $returnValues[] = trim((string)$v);
         }
-
-        return $returnValues;
     }
 
     public function withAddedHeader($name, $value): self
@@ -126,19 +124,52 @@ class Message implements MessageInterface
 
     protected function setHeaders(array $headers): void
     {
+        $this->validateHeaders($headers);
+
         foreach ($headers as $name => $values) {
             $values = (array)$values;
             $name = strtolower((string)$name);
 
-            if (!$this->hasHeader($name)) {
+            if (!($this->headers[$name] ?? false)) {
                 $this->headers[$name] = [];
             }
 
-            $values = $this->validateAndTrimHeader($name, $values);
-
-            foreach ($values as $value) {
-                $this->headers[$name][] = $value;
+            foreach ($values as &$value) {
+                $value = trim((string)$value);
             }
+            $this->headers[$name] = [...$this->headers[$name], ...$values];
+        }
+    }
+
+    /**
+     * @param array $headers
+     *
+     * It is more strict validate than RFC-7230
+     */
+    public function validateHeaders(array $headers): void
+    {
+        if (count($headers)) {
+            $names = implode('', array_keys($headers));
+            if (preg_match("/^[~0-9A-Za-z-+_.]+$/", $names) !== 1) {
+                throw new InvalidArgumentException("Header names is incorrect: $names");
+            }
+
+            $this->validateHeadersValues($headers);
+        }
+    }
+
+    protected function validateHeadersValues(array $headers): void
+    {
+        $allValues = '';
+        foreach ($headers as $values) {
+            foreach ((array)$values as $value) {
+                $allValues .= $value;
+            }
+        }
+
+        # https://donsnotes.com/tech/charsets/ascii.html
+        if ($allValues && preg_match("/^[\x09\x20-\x7E\x80-\xFF]+$/", $allValues) !== 1) {
+            throw new InvalidArgumentException('The value is incorrect for one of the header.');
         }
     }
 }

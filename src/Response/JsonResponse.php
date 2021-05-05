@@ -29,6 +29,7 @@ class JsonResponse extends HttpResponse implements JsonResponseInterface
         return $this->data;
     }
 
+    // @todo very slow, need php bench test and add method getContent
     public function getBody(): StreamInterface
     {
         if (!$this->isSyncBody) {
@@ -38,6 +39,11 @@ class JsonResponse extends HttpResponse implements JsonResponseInterface
         }
 
         return parent::getBody();
+    }
+
+    public function getContent(): string
+    {
+        return json_encode($this->data, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
     }
 
     public function withBody(StreamInterface $body): Message
@@ -56,12 +62,12 @@ class JsonResponse extends HttpResponse implements JsonResponseInterface
 
     public function reset(): static
     {
-        $this->setData([]);
+        $this->isSyncBody = false;
+        $this->data = [];
         $this->protocol = '1.1';
         $this->statusCode = 200;
         $this->attributes = [];
-        $this->headers = [];
-        $this->withHeader('Content-Type', 'application/json');
+        $this->headers = ['content-type' => ['application/json']];
 
         if ($this->stream) {
             $this->stream->close();

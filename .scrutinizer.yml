@@ -1,19 +1,5 @@
 filter:
-    paths:
-        - 'src/*'
-checks:
-    php:
-        uppercase_constants: true
-        simplify_boolean_return: true
-        return_doc_comments: true
-        properties_in_camelcaps: true
-        phpunit_assertions: true
-        parameters_in_camelcaps: true
-        parameter_doc_comments: true
-
-coding_style:
-    php: {  }
-
+    paths: ['src/*']
 
 build:
     environment:
@@ -21,8 +7,8 @@ build:
             version: 8.0
     tests:
         override:
-            -
-                command: './vendor/bin/phpunit --config tests/phpunit.xml --coverage-clover=tests/clover.xml'
+            - php-scrutinizer-run --enable-security-analysis
+            -   command: 'XDEBUG_MODE=coverage ./vendor/bin/phpunit --config tests/phpunit.xml --coverage-clover=tests/clover.xml'
                 coverage:
                     file: 'tests/clover.xml'
                     format: 'clover'

@@ -45,6 +45,6 @@
     "phpbench/phpbench": "1.0.0-beta2"
   },
   "scripts": {
-    "bench": "vendor/bin/phpbench run --config=tests/phpbench.json --report=aggregate"
+    "bench": "vendor/bin/phpbench run --config=tests/phpbench.json --profile=jit --filter=benchCreate$ --report=aggregate -vvv"
   }
 }

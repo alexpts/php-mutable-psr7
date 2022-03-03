@@ -24,9 +24,12 @@ use PTS\Psr7\Stream;
 use PTS\Psr7\UploadedFile;
 use PTS\Psr7\Uri;
 use RuntimeException;
+use Throwable;
+use function error_get_last;
 use function fopen;
 use function func_num_args;
 use function in_array;
+use function sprintf;
 
 class Psr17Factory
     implements RequestFactoryInterface, ResponseFactoryInterface, ServerRequestFactoryInterface, StreamFactoryInterface,
@@ -63,11 +66,11 @@ class Psr17Factory
     {
         $resource = @fopen($filename, $mode);
         if (false === $resource) {
-            if ('' === $mode || false === in_array($mode[0], ['r', 'w', 'a', 'x', 'c'])) {
-                throw new InvalidArgumentException('The mode ' . $mode . ' is invalid.');
+            if ('' === $mode || false === in_array($mode[0], ['r', 'w', 'a', 'x', 'c'], true)) {
+                throw new InvalidArgumentException(sprintf('The mode "%s" is invalid.', $mode));
             }
 
-            throw new RuntimeException('The file ' . $filename . ' cannot be opened.');
+            throw new RuntimeException(sprintf('The file "%s" cannot be opened.', $filename));
         }
 
         return Stream::create($resource);

@@ -6,6 +6,9 @@ namespace PTS\Psr7\Factory;
 use Http\Message\MessageFactory;
 use Http\Message\StreamFactory;
 use Http\Message\UriFactory;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
 use PTS\Psr7\Request;
 use PTS\Psr7\Response;
@@ -14,7 +17,7 @@ use PTS\Psr7\Uri;
 
 class HttplugFactory implements MessageFactory, StreamFactory, UriFactory
 {
-    public function createRequest($method, $uri, array $headers = [], $body = null, $protocolVersion = '1.1')
+    public function createRequest($method, $uri, array $headers = [], $body = null, $protocolVersion = '1.1'): RequestInterface
     {
         $uri = $this->createUri($uri);
         return new Request($method, $uri, $headers, $body, $protocolVersion);
@@ -26,11 +29,11 @@ class HttplugFactory implements MessageFactory, StreamFactory, UriFactory
         array $headers = [],
         $body = null,
         $version = '1.1'
-    ) {
+    ): ResponseInterface {
         return new Response((int)$statusCode, $headers, $body, $version, $reasonPhrase);
     }
 
-    public function createStream($body = null)
+    public function createStream($body = null): StreamInterface
     {
         return Stream::create($body ?? '');
     }

@@ -254,7 +254,7 @@ class Stream implements StreamInterface
     public function getContents(): string
     {
         if (!isset($this->stream)) {
-            throw new RuntimeException('Unable to read stream contents');
+            throw new RuntimeException('Stream is detached');
         }
 
         if (false === $contents = @stream_get_contents($this->stream)) {
@@ -264,6 +264,10 @@ class Stream implements StreamInterface
         return $contents;
     }
 
+    /**
+     * @param string|null $key
+     * @return mixed
+     */
     public function getMetadata($key = null)
     {
         if (!isset($this->stream)) {

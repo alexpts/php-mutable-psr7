@@ -10,6 +10,7 @@ use RuntimeException;
 use Throwable;
 use function fopen;
 use function is_int;
+use function is_resource;
 use function is_string;
 use function move_uploaded_file;
 use function rename;
@@ -69,9 +70,9 @@ final class UploadedFile implements UploadedFileInterface
 
         if (\UPLOAD_ERR_OK === $this->error) {
             // Depending on the value set file or stream variable.
-            if (is_string($streamOrFile)) {
+            if (is_string($streamOrFile) && '' !== $streamOrFile) {
                 $this->file = $streamOrFile;
-            } elseif (\is_resource($streamOrFile)) {
+            } elseif (is_resource($streamOrFile)) {
                 $this->stream = Stream::create($streamOrFile);
             } elseif ($streamOrFile instanceof StreamInterface) {
                 $this->stream = $streamOrFile;
@@ -103,9 +104,11 @@ final class UploadedFile implements UploadedFileInterface
             return $this->stream;
         }
 
-        $resource = fopen($this->file, 'r');
-
-        return Stream::create($resource);
+        try {
+            return Stream::create(fopen($this->file, 'r'));
+        } catch (Throwable $e) {
+            throw new RuntimeException(sprintf('The file "%s" cannot be opened.', $this->file));
+        }
     }
 
     public function moveTo($targetPath): void

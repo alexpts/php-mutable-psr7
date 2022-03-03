@@ -55,7 +55,7 @@ class Psr17FactoryTest extends TestCase
         $factory = new Psr17Factory;
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('The file bad.txt cannot be opened.');
+        $this->expectExceptionMessage('The file "bad.txt" cannot be opened.');
         $factory->createStreamFromFile('bad.txt');
     }
 
@@ -64,7 +64,7 @@ class Psr17FactoryTest extends TestCase
         $factory = new Psr17Factory;
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('The mode ud is invalid.');
+        $this->expectExceptionMessage('The mode "ud" is invalid.');
         $factory->createStreamFromFile(dirname(__DIR__) . '/Resources/foo.txt', 'ud');
     }
 

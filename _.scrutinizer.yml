@@ -4,7 +4,12 @@ filter:
 build:
     environment:
         php:
-            version: 8.1
+            version: 8.1.2
+
+    dependencies:
+        before:
+            - sudo apt-get install -y libssl-dev
+
     tests:
         override:
             - php-scrutinizer-run --enable-security-analysis

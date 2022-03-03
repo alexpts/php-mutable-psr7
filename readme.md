@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/alexpts/php-mutable-psr7.svg?branch=master)](https://travis-ci.org/alexpts/php-mutable-psr7)
+[![Build Status](https://app.travis-ci.com/alexpts/php-mutable-psr7.svg?branch=master)](https://app.travis-ci.com/alexpts/php-mutable-psr7)
 [![Code Coverage](https://scrutinizer-ci.com/g/alexpts/php-mutable-psr7/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/alexpts/php-mutable-psr7/?branch=master)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/alexpts/php-mutable-psr7/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/alexpts/php-mutable-psr7/?branch=master)
 

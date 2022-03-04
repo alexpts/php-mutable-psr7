@@ -88,7 +88,4 @@ $response = $psr17Factory->createResponse(200)->withBody($responseBody);
 
 ### Benchmark Tests
 
-`cd tests && php ../vendor/bin/phpbench run --report=aggregate`
-`cd tests && php ../vendor/bin/phpbench run --report=aggregate --filter=benchCreatePsr7Response`
-or
 `composer bench`

@@ -2,16 +2,28 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\StreamInterface;
 use PTS\Psr7\Stream;
+use PTS\Psr7\Stream\MemoryStream;
 
 class StreamTest extends TestCase
 {
 
-    public function testConstructorInitializesProperties(): void
+    public function streamProvider(): array
+    {
+        return [
+            'stream' => [[Stream::class, 'create']],
+            'memory' => [[MemoryStream::class, 'create']],
+        ];
+    }
+
+
+    public function testStreamConstructorInitializesProperties(): void
     {
         $handle = fopen('php://temp', 'rb+');
         fwrite($handle, 'data');
         $stream = Stream::create($handle);
+
         static::assertTrue($stream->isReadable());
         static::assertTrue($stream->isWritable());
         static::assertTrue($stream->isSeekable());
@@ -26,86 +38,139 @@ class StreamTest extends TestCase
     {
         $handle = fopen('php://temp', 'r');
         $stream = Stream::create($handle);
+
         unset($stream);
         static::assertFalse(is_resource($handle));
     }
 
-    public function testConvertsToString(): void
-    {
-        $handle = fopen('php://temp', 'w+');
-        fwrite($handle, 'data');
-        $stream = Stream::create($handle);
-        static::assertSame('data', (string)$stream);
-        static::assertSame('data', (string)$stream);
-        $stream->close();
-    }
 
-    public function testBuildFromString()
+    /**
+     * @param callable $streamFactory
+     * @return void
+     *
+     * @dataProvider streamProvider
+     */
+    public function testConstructorInitializesProperties(callable $streamFactory): void
     {
-        $stream = Stream::create('data');
-        $this->assertEquals('data', $stream->__toString());
-        $stream->close();
-    }
+        /** @var StreamInterface $stream */
+        $stream = $streamFactory('data');
 
-    public function testGetsContents(): void
-    {
-        $handle = fopen('php://temp', 'w+');
-        fwrite($handle, 'data');
-        $stream = Stream::create($handle);
+        static::assertTrue($stream->isReadable());
+        static::assertTrue($stream->isWritable());
+        static::assertTrue($stream->isSeekable());
+        static::assertIsArray($stream->getMetadata());
+        static::assertSame(4, $stream->getSize());
+        static::assertSame(4, $stream->tell());
         static::assertSame('', $stream->getContents());
+        static::assertTrue($stream->eof());
+    }
+
+    /**
+     * @param callable $streamFactory
+     * @return void
+     *
+     * @dataProvider streamProvider
+     */
+    public function testConvertsToString(callable $streamFactory): void
+    {
+        /** @var StreamInterface $stream */
+        $stream = $streamFactory('data');
+
+        static::assertSame('data', (string)$stream);
+        static::assertSame('data', (string)$stream);
+        $stream->close();
+    }
+
+    /**
+     * @param callable $streamFactory
+     * @return void
+     *
+     * @dataProvider streamProvider
+     */
+    public function testGetsContents(callable $streamFactory): void
+    {
+        /** @var StreamInterface $stream */
+        $stream = $streamFactory('data');
         $stream->seek(0);
+
         static::assertSame('data', $stream->getContents());
         static::assertSame('', $stream->getContents());
     }
 
-    public function testChecksEof(): void
+    /**
+     * @param callable $streamFactory
+     * @return void
+     *
+     * @dataProvider streamProvider
+     */
+    public function testChecksEof(callable $streamFactory): void
     {
-        $handle = fopen('php://temp', 'w+');
-        fwrite($handle, 'data');
-        $stream = Stream::create($handle);
+        /** @var StreamInterface $stream */
+        $stream = $streamFactory('data');
+
+        $stream->seek(0);
         static::assertFalse($stream->eof());
-        $stream->read(4);
+        $stream->read(5);
         static::assertTrue($stream->eof());
         $stream->close();
     }
 
-    public function testGetSize(): void
+    /**
+     * @param callable $streamFactory
+     * @return void
+     *
+     * @dataProvider streamProvider
+     */
+    public function testGetSize(callable $streamFactory): void
     {
-        $size = filesize(__FILE__);
-        $handle = fopen(__FILE__, 'r');
-        $stream = Stream::create($handle);
-        static::assertSame($size, $stream->getSize());
+        /** @var StreamInterface $stream */
+        $stream = $streamFactory('data');
+
+        static::assertSame(4, $stream->getSize());
         // Load from cache
-        static::assertSame($size, $stream->getSize());
+        static::assertSame(4, $stream->getSize());
         $stream->close();
     }
 
-    public function testEnsuresSizeIsConsistent(): void
+    /**
+     * @param callable $streamFactory
+     * @return void
+     *
+     * @dataProvider streamProvider
+     */
+    public function testEnsuresSizeIsConsistent(callable $streamFactory): void
     {
-        $h = fopen('php://temp', 'w+');
-        static::assertSame(3, fwrite($h, 'foo'));
-        $stream = Stream::create($h);
+        /** @var StreamInterface $stream */
+        $stream = $streamFactory('foo');
+
         static::assertSame(3, $stream->getSize());
+        static::assertSame(3, $stream->tell());
         static::assertSame(4, $stream->write('test'));
         static::assertSame(7, $stream->getSize());
-        static::assertSame(7, $stream->getSize());
+        static::assertSame(7, $stream->tell());
         $stream->close();
     }
 
-    public function testProvidesStreamPosition(): void
+    /**
+     * @param callable $streamFactory
+     * @return void
+     *
+     * @dataProvider streamProvider
+     */
+    public function testProvidesStreamPosition(callable $streamFactory): void
     {
-        $handle = fopen('php://temp', 'w+');
-        $stream = Stream::create($handle);
+        /** @var StreamInterface $stream */
+        $stream = $streamFactory('');
+
         static::assertSame(0, $stream->tell());
         $stream->write('foo');
         static::assertSame(3, $stream->tell());
         $stream->seek(1);
         static::assertSame(1, $stream->tell());
-        static::assertSame(ftell($handle), $stream->tell());
         $stream->close();
     }
 
-    public function testCanDetachStream(): void
+    public function testStreamCanDetachStream(): void
     {
         $r = fopen('php://temp', 'w+');
         $stream = Stream::create($r);
@@ -156,10 +221,16 @@ class StreamTest extends TestCase
         $stream->close();
     }
 
-    public function testCloseClearProperties(): void
+    /**
+     * @param callable $streamFactory
+     * @return void
+     *
+     * @dataProvider streamProvider
+     */
+    public function testCloseClearProperties(callable $streamFactory): void
     {
-        $handle = fopen('php://temp', 'r+');
-        $stream = Stream::create($handle);
+        /** @var StreamInterface $stream */
+        $stream = $streamFactory('data');
         $stream->close();
 
         static::assertFalse($stream->isSeekable());
@@ -169,7 +240,7 @@ class StreamTest extends TestCase
         static::assertEmpty($stream->getMetadata());
     }
 
-    public function testUnSeekableStreamWrapper(): void
+    public function testStreamUnSeekableStreamWrapper(): void
     {
         stream_wrapper_register('stream-psr7-test', TestStreamWrapper::class);
         $handle = fopen('stream-psr7-test://', 'r');
@@ -179,18 +250,23 @@ class StreamTest extends TestCase
         static::assertFalse($stream->isSeekable());
     }
 
-    public function testBodyNotString(): void
+    public function testStreamBodyNotString(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('First argument to Stream::create() must be a string, resource or StreamInterface');
         Stream::create(1234);
     }
 
-    public function testRewind(): void
+    /**
+     * @param callable $streamFactory
+     * @return void
+     *
+     * @dataProvider streamProvider
+     */
+    public function testRewind(callable $streamFactory): void
     {
-        $handle = fopen('php://temp', 'r+');
-        fwrite($handle, 'data');
-        $stream = Stream::create($handle);
+        /** @var StreamInterface $stream */
+        $stream = $streamFactory('data');
 
         static::assertSame('', $stream->getContents());
 
@@ -198,11 +274,16 @@ class StreamTest extends TestCase
         static::assertSame('data', $stream->getContents());
     }
 
-    public function testSeekToMoreMax(): void
+    /**
+     * @param callable $streamFactory
+     * @return void
+     *
+     * @dataProvider streamProvider
+     */
+    public function testSeekToMoreMax(callable $streamFactory): void
     {
-        $handle = fopen('php://temp', 'r+');
-        fwrite($handle, 'data');
-        $stream = Stream::create($handle);
+        /** @var StreamInterface $stream */
+        $stream = $streamFactory('data');
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Unable to seek to stream position 999 with whence 0');
